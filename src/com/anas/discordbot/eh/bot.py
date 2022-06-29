@@ -8,12 +8,16 @@ from py3pin.Pinterest import Pinterest
 
 # Check arguments
 if len(sys.argv) < 4:
-    print("Usage: python3 bot.py <bot_token>  <pinterst_username> <pinterst_email> <pinterst_password>")
+    print("Usage: python3 bot.py <bot_token>  <pinterest_username> <pinterest_email> <pinterest_password>")
     sys.exit(1)
 
 
 # Utils
 def get_random_meme_url():
+    """
+    It gets a random pin from the list of pins, gets the image url from the pin, and returns the image url
+    :return: A random meme url
+    """
     # Get random pin
     pin = pins[randint(0, len(pins) - 1)]
     # Get pin's image url
@@ -25,6 +29,12 @@ def get_random_meme_url():
 
 
 def download_image(url):
+    """
+    It downloads an image from a URL and returns the image as a file object
+
+    :param url: The URL of the image to download
+    :return: The image is being returned as a binary file.
+    """
     image = requests.get(url)
     # Save image
     with open('meme.jpg', 'wb') as f:
@@ -38,6 +48,7 @@ pinterest = Pinterest(email=sys.argv[3],
                       password=sys.argv[4],
                       username=sys.argv[2],
                       cred_root='cred_root')
+# Logging in to Pinterest using the credentials provided.
 pinterest.login()
 
 # Get meme board id
