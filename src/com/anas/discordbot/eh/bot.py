@@ -3,6 +3,8 @@ import requests
 from random import randint
 import sys
 import discord
+from threading import Thread
+from time import sleep
 from discord.ext import commands
 from py3pin.Pinterest import Pinterest
 
@@ -65,14 +67,25 @@ bot = commands.Bot(command_prefix='!')
 bot.activity = discord.Game(name="!eh")
 
 # Getting all the pins from the board.
-pins = pinterest.board_feed(board_id=memes_board_id)
+pins = []
+
+
+def update_pins():
+    while True:
+        pins = pinterest.board_feed(board_id=memes_board_id)
+        print("Updated")
+        sleep((60 * 60) * 6)  # Update pins every 6 hours
+
+
+# Start update thread
+Thread(target=update_pins).start()
 
 
 # Commands
 @bot.command()
 async def eh(ctx):
     meme = download_image(get_random_meme_url())
-    await ctx.send(file=discord.File(meme, 'meme.jpg'))
+    await ctx.send(file=discord.File(meme, 'meme.jpg'), content=None)
     os.remove('meme.jpg')
 
 
