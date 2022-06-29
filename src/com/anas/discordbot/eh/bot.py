@@ -1,14 +1,8 @@
 import os
-from datetime import datetime
-
 import requests
 from random import randint
 import sys
 import discord
-from threading import Thread
-from time import sleep
-
-import self as self
 from discord.ext import commands
 from py3pin.Pinterest import Pinterest
 
