@@ -1,10 +1,14 @@
 import os
+from datetime import datetime
+
 import requests
 from random import randint
 import sys
 import discord
 from threading import Thread
 from time import sleep
+
+import self as self
 from discord.ext import commands
 from py3pin.Pinterest import Pinterest
 
@@ -15,7 +19,7 @@ if len(sys.argv) < 4:
 
 
 # Utils
-def get_random_meme_url():
+def get_random_meme_url(pins):
     """
     It gets a random pin from the list of pins, gets the image url from the pin, and returns the image url
     :return: A random meme url
@@ -61,53 +65,40 @@ for board in pinterest.boards():
         break
 print("Memes board id: " + memes_board_id)
 
-# Create bot
-bot = commands.Bot(command_prefix='!')
 
-bot.activity = discord.Game(name="!eh")
+class Bot:
+    # Create bot
+    def __init__(self, bot_token):
+        self.bot = commands.Bot(command_prefix='!')
+        self.bot.activity = discord.Game(name="!eh")
+        self.pins = pinterest.board_feed(board_id=memes_board_id)
+        self.setup_commands(self.bot)
+        self.bot.run(bot_token)
 
-# Getting all the pins from the board.
-pins = []
+    def setup_commands(self, bot):
+        # Commands
+        @bot.command()
+        async def eh(ctx):
+            meme = download_image(get_random_meme_url(self.pins))
+            await ctx.send(file=discord.File(meme, 'meme.jpg'), content=None)
+            os.remove('meme.jpg')
 
+        @bot.command()
+        async def ping(ctx):
+            await ctx.send("Pong!")
 
-def update_pins():
-    while True:
-        pins = pinterest.board_feed(board_id=memes_board_id)
-        print("Updated")
-        sleep((60 * 60) * 6)  # Update pins every 6 hours
+        @bot.command()
+        async def eh_help(ctx):
+            await ctx.send("!eh - Get a random meme\n!ping - Pong!\n!eh_dev - about developer\n"
+                           "!eh_src - get source code\n!eh_help - help")
 
+        @bot.command()
+        async def eh_dev(ctx):
+            await ctx.send("Anas Elgarhy - https://github.com/anas-elgarhy")
 
-# Start update thread
-Thread(target=update_pins).start()
-
-
-# Commands
-@bot.command()
-async def eh(ctx):
-    meme = download_image(get_random_meme_url())
-    await ctx.send(file=discord.File(meme, 'meme.jpg'), content=None)
-    os.remove('meme.jpg')
-
-
-@bot.command()
-async def ping(ctx):
-    await ctx.send("Pong!")
-
-
-@bot.command()
-async def eh_help(ctx):
-    await ctx.send("!eh - Get a random meme\n!ping - Pong!\n!eh_dev - about developer\n"
-                   "!eh_src - get source code\n!eh_help - help")
+        @bot.command()
+        async def eh_src(ctx):
+            await ctx.send("https://github.com/anas-elgarhy/eh")
 
 
-@bot.command()
-async def eh_dev(ctx):
-    await ctx.send("Anas Elgarhy - https://github.com/anas-elgarhy")
-
-
-@bot.command()
-async def eh_src(ctx):
-    await ctx.send("https://github.com/anas-elgarhy/eh")
-
-# Run bot
-bot.run(sys.argv[1])
+Bot(sys.argv[1])  # Start bot
